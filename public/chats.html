@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Messenger</title>
+
+    <style>
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:Segoe UI,sans-serif;
+        }
+
+        body{
+            background:#0f172a;
+            height:100vh;
+            overflow:hidden;
+        }
+
+        .container{
+            display:flex;
+            height:100vh;
+        }
+
+        /* CHAT */
+
+        .chat{
+            flex:1;
+            display:flex;
+            flex-direction:column;
+            background:#111827;
+        }
+
+        .chat-header{
+            padding:20px;
+            border-bottom:1px solid #1f2937;
+            color:white;
+            font-size:20px;
+            font-weight:600;
+        }
+
+        .messages{
+            flex:1;
+            overflow-y:auto;
+            padding:20px;
+            display:flex;
+            flex-direction:column;
+            gap:12px;
+        }
+
+        .message{
+            max-width:70%;
+            padding:12px 16px;
+            border-radius:14px;
+            color:white;
+        }
+
+        .me{
+            align-self:flex-end;
+            background:#2563eb;
+        }
+
+        .other{
+            align-self:flex-start;
+            background:#374151;
+        }
+
+        .message-form{
+            padding:15px;
+            border-top:1px solid #1f2937;
+            display:flex;
+            gap:10px;
+        }
+
+        .message-form input{
+            flex:1;
+            border:none;
+            outline:none;
+            padding:14px;
+            border-radius:10px;
+            background:#1f2937;
+            color:white;
+        }
+
+        .message-form button{
+            border:none;
+            background:#2563eb;
+            color:white;
+            padding:14px 20px;
+            border-radius:10px;
+            cursor:pointer;
+        }
+
+        .message-form button:hover{
+            background:#1d4ed8;
+        }
+
+        /* SIDEBAR */
+
+        .sidebar{
+            width:340px;
+            background:#020617;
+            border-left:1px solid #1f2937;
+            display:flex;
+            flex-direction:column;
+        }
+
+        .sidebar-header{
+            padding:20px;
+            color:white;
+            border-bottom:1px solid #1f2937;
+        }
+
+        .chat-create{
+            display:flex;
+            gap:10px;
+            margin-top:15px;
+        }
+
+        .chat-create input{
+            flex:1;
+            padding:10px;
+            border:none;
+            border-radius:8px;
+            background:#1f2937;
+            color:white;
+        }
+
+        .chat-create button{
+            background:#2563eb;
+            border:none;
+            color:white;
+            border-radius:8px;
+            padding:10px 15px;
+            cursor:pointer;
+        }
+
+        .chat-list{
+            overflow-y:auto;
+            flex:1;
+        }
+
+        .chat-item{
+            padding:16px 20px;
+            color:white;
+            cursor:pointer;
+            border-bottom:1px solid rgba(255,255,255,.03);
+            transition:.2s;
+        }
+
+        .chat-item:hover{
+            background:#111827;
+        }
+
+        .chat-item.active{
+            background:#1e293b;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <div class="chat">
+
+        <div class="chat-header" id="chatTitle">
+            Выберите чат
+        </div>
+
+        <div class="messages" id="messages"></div>
+
+        <form class="message-form" id="messageForm">
+            <input
+                    type="text"
+                    id="messageInput"
+                    placeholder="Введите сообщение..."
+            >
+            <button>Отправить</button>
+        </form>
+
+    </div>
+
+    <div class="sidebar">
+
+        <div class="sidebar-header">
+
+            <h2>Чаты</h2>
+
+            <div class="chat-create">
+                <input
+                        type="text"
+                        id="chatName"
+                        placeholder="Название чата"
+                >
+                <button id="createChat">
+                    +
+                </button>
+            </div>
+
+        </div>
+
+        <div class="chat-list" id="chatList"></div>
+
+    </div>
+
+</div>
+
+<script>
+
+    const chats = {};
+    let currentChat = null;
+
+    const chatList = document.getElementById("chatList");
+    const chatTitle = document.getElementById("chatTitle");
+    const messages = document.getElementById("messages");
+
+    function renderChats(){
+
+        chatList.innerHTML = "";
+
+        Object.keys(chats).forEach(chatName => {
+
+            const div = document.createElement("div");
+
+            div.className =
+                "chat-item" +
+                (chatName === currentChat ? " active" : "");
+
+            div.textContent = chatName;
+
+            div.onclick = () => {
+                currentChat = chatName;
+                renderChats();
+                renderMessages();
+            };
+
+            chatList.appendChild(div);
+
+        });
+    }
+
+    function renderMessages(){
+
+        messages.innerHTML = "";
+
+        if(!currentChat){
+            chatTitle.textContent = "Выберите чат";
+            return;
+        }
+
+        chatTitle.textContent = currentChat;
+
+        chats[currentChat].forEach(msg => {
+
+            const div = document.createElement("div");
+
+            div.className =
+                message ${msg.type};
+
+            div.textContent = msg.text;
+
+            messages.appendChild(div);
+
+        });
+
+        messages.scrollTop = messages.scrollHeight;
+    }
+
+    document
+        .getElementById("createChat")
+        .addEventListener("click", () => {
+
+            const input =
+                document.getElementById("chatName");
+
+            const name = input.value.trim();
+
+            if(!name) return;
+
+            if(!chats[name]){
+
+                chats[name] = [];
+
+                currentChat = name;
+
+                renderChats();
+                renderMessages();
+
+            }
+
+            input.value = "";
+
+        });
+
+    document
+        .getElementById("messageForm")
+        .addEventListener("submit", e => {
+
+            e.preventDefault();
+
+            if(!currentChat) return;
+
+            const input =
+                document.getElementById("messageInput");
+
+            const text = input.value.trim();
+
+            if(!text) return;
+
+            chats[currentChat].push({
+                text,
+                type:"me"
+            });
+
+            renderMessages();
+
+            input.value = "";
+
+            // Имитация ответа
+
+            setTimeout(() => {
+
+                chats[currentChat].push({
+                    text:"Получил: " + text,
+                    type:"other"
+                });
+
+                renderMessages();
+
+            },700);
+
+        });
+
+</script>
+
+</body>
+</html>
