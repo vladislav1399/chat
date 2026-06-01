@@ -5,6 +5,7 @@ import { WebSocketServer } from "ws"
 import sequelize from "./db.js";
 import { fileURLToPath } from "url";
 import path from "path";
+import { auth } from "./midllewares/auth.js";
 
 export const __filename = fileURLToPath(import.meta.url);
 export const __dirname = path.dirname(__filename);
@@ -19,11 +20,13 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 app.use("/", authRouter );
 
-// app.get("/chat", (req, res) => {
-//     res.sendFile(path.join(__dirname, "public", "index.html"));
-// });
+app.get("/chat", (req, res) => {
 
-app.get("/", (req, res) => {
+    res.sendFile(path.join(__dirname, "public", "index.html"));
+});
+
+app.get("/token", auth, (req, res) => {
+    console.log(req.headers.authorization);
     console.log('ef')
     res.json({Message: "wfdsf"})
 });

@@ -1,5 +1,8 @@
 import { UserModel } from "../models/user.model.js"
 import bcrypt from "bcrypt";
+import jwt from 'jsonwebtoken';
+
+const secret = "secretkey"
 
 export const registerUser = async (req, res) => {
 
@@ -55,13 +58,19 @@ export const login = async (req, res) => {
         if (!isMatch) {
             return res.status(401).json({ message: "Wrong password" });
         }
-
+        const token = jwt.sign(
+            {
+                id: user.id,
+                username: user.username
+            },
+            secret,
+            // process.env.JWT_SECRET,
+            {
+                expiresIn: '7d'
+            }
+        );
         // 4. успех (не возвращаем пароль)
-        return res.json({
-            id: user.id,
-            username: user.username,
-            message: "Login success",
-        });
+        return res.json({ token });
 
     } catch (err) {
         console.error(err);
