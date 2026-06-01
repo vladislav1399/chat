@@ -18,6 +18,7 @@ form.addEventListener("submit", async (e) => {
         const data = await res.json();
         console.log("Ответ сервера:", data);
         localStorage.setItem("token", data.token);
+        window.location.href = "/";
 
     } catch (err) {
         console.error("Ошибка:", err);

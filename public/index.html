@@ -2,21 +2,54 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Chat</title>
-    <link rel="stylesheet" href="./сss/index.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Messenger</title>
+    <link rel="stylesheet" href="./сss/chat.css">
 </head>
 <body>
 
-<div class="chat">
-    <div class="messages" id="messages"></div>
+<div class="app">
 
-    <div class="bottom">
-        <input id="input">
-        <button onclick="send()">Send</button>
-    </div>
+    <aside class="sidebar">
+
+        <div class="sidebar-header">
+            <h2>Чаты</h2>
+
+            <div class="add-chat">
+                <input id="chatName" placeholder="Название чата">
+                <button onclick="createChat()">+</button>
+            </div>
+        </div>
+
+        <div class="chat-list" id="chatList"></div>
+
+    </aside>
+
+    <main class="chat-container">
+
+        <div class="chat-header" id="chatTitle">
+            Выберите чат
+        </div>
+
+        <div class="messages" id="messages">
+            <div class="empty">
+                Чат не выбран
+            </div>
+        </div>
+
+        <div class="message-form">
+            <input
+                    id="messageInput"
+                    placeholder="Введите сообщение..."
+            >
+            <button onclick="sendMessage()">Отправить</button>
+        </div>
+
+    </main>
+
 </div>
 
 <script src="./js/check-token.js"></script>
-<script src="./js/index.js"></script>
+<script src="./js/chat.js"></script>
 </body>
 </html>
