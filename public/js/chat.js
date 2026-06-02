@@ -1,53 +1,102 @@
-const chats = {};
+
+const ws = new WebSocket("ws://localhost:8880");
+
+let chatsArr = []
 let currentChat = null;
 
-function createChat() {
+
+const generationChats = async () => {
+    const token = localStorage.getItem('token');
+    const response = await fetch('/chats', {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+    if(response.status === 200) {
+        return  await response.json();
+    } else {
+    }
+};
+
+generationChats().then(chats => {
+    chatsArr = chats
+    renderChats();
+});
+
+
+ws.onopen = () => {
+    console.log("WS connected");
+};
+
+ws.onmessage = ({ data }) => {
+    const event = JSON.parse(data);
+    console.log(event)
+    if (event.type === "chat_created") {
+        const chat = event.chat;
+        chatsArr[chat.title] = [];
+        renderChats();
+    }
+};
+
+
+async function createChat() {
 
     const input = document.getElementById("chatName");
-    const name = input.value.trim();
+    const title = input.value.trim();
 
-    if (!name) return;
+    if (!title) return;
 
-    if (chats[name]) {
+    if (chatsArr[title]) {
         alert("Такой чат уже существует");
         return;
     }
+        const token = localStorage.getItem("token");
 
-    chats[name] = [];
+        const response = await fetch("/chats", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                title
+            })
+        });
 
+        const chat = await response.json();
+
+     chatsArr[title] = [];
     input.value = "";
-
     renderChats();
-    openChat(name);
+    openChat(title);
 }
+
 
 function renderChats() {
 
     const list = document.getElementById("chatList");
     list.innerHTML = "";
-
-    Object.keys(chats).forEach(name => {
-
+    chatsArr.forEach(chat => {
         const div = document.createElement("div");
 
         div.className =
             "chat-item" +
-            (name === currentChat ? " active" : "");
+            (chat.title === currentChat ? " active" : "");
 
-        div.textContent = name;
+        div.textContent = chat.title;
 
-        div.onclick = () => openChat(name);
+        div.onclick = () => openChat(chat.title);
 
         list.appendChild(div);
     });
 }
 
-function openChat(name) {
+function openChat(title) {
 
-    currentChat = name;
+    currentChat = title;
 
     document.getElementById("chatTitle")
-        .textContent = name;
+        .textContent = title;
 
     renderChats();
     renderMessages();
@@ -62,7 +111,7 @@ function renderMessages() {
 
     if (!currentChat) return;
 
-    chats[currentChat].forEach(msg => {
+    chatsArr[currentChat].forEach(msg => {
 
         const div = document.createElement("div");
 
@@ -92,7 +141,7 @@ function sendMessage() {
 
     if (!text) return;
 
-    chats[currentChat].push({
+    chatsArr[currentChat].push({
         text,
         mine:true
     });
@@ -103,7 +152,7 @@ function sendMessage() {
 
     setTimeout(() => {
 
-        chats[currentChat].push({
+        chatsArr[currentChat].push({
             text:"Ответ на: " + text,
             mine:false
         });

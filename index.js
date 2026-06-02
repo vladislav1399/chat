@@ -1,11 +1,12 @@
 import express from 'express';
 import http from 'http'
-import { WebSocketServer } from "ws"
-
 import sequelize from "./db.js";
 import { fileURLToPath } from "url";
 import path from "path";
 import { auth } from "./midllewares/auth.js";
+import { initWebSocket } from "./websocket.js";
+
+
 
 export const __filename = fileURLToPath(import.meta.url);
 export const __dirname = path.dirname(__filename);
@@ -14,11 +15,12 @@ const app = express()
 const server = http.createServer(app);
 
 import authRouter from "./routes/auth.router.js";
-
+import chatRouter from "./routes/chat.router.js";
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 app.use("/", authRouter );
+app.use("/chats", chatRouter)
 
 
 app.get("/token", auth, (req, res) => {
@@ -27,8 +29,7 @@ app.get("/token", auth, (req, res) => {
     res.json({Message: "wfdsf"})
 });
 
-
-const wsServer = new WebSocketServer({server});
+const wsServer = initWebSocket(server);
 
 wsServer.on('connection', (ws) => {
     console.log(`Websocket connection connected: ${ws}`);

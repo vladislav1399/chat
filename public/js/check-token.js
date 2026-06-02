@@ -1,4 +1,5 @@
-const checkToken =  async () => {const token = localStorage.getItem('token');
+const checkToken =  async () => {
+    const token = localStorage.getItem('token');
     console.log(token)
 if(token) {
    const response = await fetch('/token', {
