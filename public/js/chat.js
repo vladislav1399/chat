@@ -203,6 +203,11 @@ async function  sendMessage() {
     }
 }
 
+function logout() {
+    localStorage.removeItem("token");
+    window.location.href = "/login"
+}
+
 document
     .getElementById("messageInput")
     .addEventListener("keydown", e => {

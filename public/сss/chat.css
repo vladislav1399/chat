@@ -224,24 +224,51 @@ body {
     word-wrap: break-word;
 }
 
-/* ТВОИ СООБЩЕНИЯ → СПРАВА */
-.message.mine {
-    align-self: flex-end;
-    background: #2563eb;
-    color: white;
-    border-bottom-right-radius: 6px;
-}
-
-/* ЧУЖИЕ → СЛЕВА */
-.message.other {
-    align-self: flex-start;
-    background: #1f2937;
-    color: #e5e7eb;
-    border-bottom-left-radius: 6px;
-}
-
-.messages {
+.profile {
     display: flex;
-    flex-direction: column;
-    gap: 10px;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-size: 22px;
+    font-weight: 700;
+    cursor: pointer;
+    user-select: none;
+    transition: .2s;
+}
+
+.avatar:hover {
+    transform: scale(1.05);
+}
+
+.profile {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.logout-btn {
+    border: none;
+    background: #1f2937;
+    color: #cbd5e1;
+    padding: 10px 14px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: .2s;
+    font-size: 14px;
+}
+
+.logout-btn:hover {
+    background: #dc2626;
+    color: white;
 }

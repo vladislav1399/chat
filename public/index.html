@@ -13,12 +13,25 @@
     <aside class="sidebar">
 
         <div class="sidebar-header">
-            <h2>Чаты</h2>
+
+            <div class="profile">
+
+                <div class="avatar " id="avatar">
+                    V
+
+                </div>
+
+                <button class="logout-btn" onclick="logout()">
+                    Выйти
+                </button>
+
+            </div>
 
             <div class="add-chat">
                 <input id="chatName" placeholder="Название чата">
                 <button onclick="createChat()">+</button>
             </div>
+
         </div>
 
         <div class="chat-list" id="chatList"></div>

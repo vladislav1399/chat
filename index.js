@@ -1,13 +1,9 @@
 import express from 'express';
 import http from 'http'
 import sequelize from "./db.js";
-import { fileURLToPath } from "url";
-import path from "path";
 import { auth } from "./midllewares/auth.js";
 import { initWebsSocket } from "./websocket.js";
 
-export const __filename = fileURLToPath(import.meta.url);
-export const __dirname = path.dirname(__filename);
 
 const app = express()
 const server = http.createServer(app);
@@ -21,7 +17,8 @@ import {ChatModel} from "./models/chat.model.js";
 import {UserModel} from "./models/user.model.js";
 
 app.use(express.json());
-app.use(express.static(path.join(__dirname, "public")));
+
+app.use(express.static("public"));
 
 app.use("/", authRouter );
 app.use("/chats", chatRouter)
@@ -31,7 +28,7 @@ app.use("/messages", messagesRouter)
 app.get("/token", auth, (req, res) => {
     console.log(req.headers.authorization);
     console.log('ef')
-    res.json({Message: "wfdsf"})
+    res.json({Message: "Что это такое"})
 });
 
 initWebsSocket(server);

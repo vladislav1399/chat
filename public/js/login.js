@@ -1,3 +1,4 @@
+
 const form = document.getElementById("loginForm");
 
 
@@ -8,7 +9,7 @@ form.addEventListener("submit", async (e) => {
     const password = document.getElementById("password").value;
 
     try {
-        const res = await fetch("/auth", {
+        const res = await fetch("/login", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -21,6 +22,7 @@ form.addEventListener("submit", async (e) => {
         localStorage.setItem("token", data.token);
         const payload = JSON.parse(atob(data.token.split(".")[1]));
         window.userId = payload.id;
+        window.username = payload.username
         window.location.href = "/";
 
     } catch (err) {

@@ -1,6 +1,12 @@
 import { UserModel } from "../models/user.model.js"
 import bcrypt from "bcrypt";
 import jwt from 'jsonwebtoken';
+import path from "path";
+
+import {fileURLToPath} from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const secret = "secretkey"
 
@@ -77,3 +83,11 @@ export const login = async (req, res) => {
         return res.status(500).json({ message: "Server error" });
     }
 };
+
+export const getLoginPage = async (req, res) => {
+    res.sendFile(path.join(__dirname, "../public/login.html"));
+}
+
+export const getRegisterPage = async (req, res) => {
+    res.sendFile(path.join(__dirname, "../public/register.html"));
+}

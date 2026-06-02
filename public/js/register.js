@@ -1,3 +1,4 @@
+
 const form = document.getElementById("registerForm");
 
 form.addEventListener("submit", async (e) => {
@@ -16,6 +17,7 @@ form.addEventListener("submit", async (e) => {
         });
 
         const data = await res.json();
+        window.location.href = "/login";
         console.log("Ответ сервера:", data);
 
     } catch (err) {
