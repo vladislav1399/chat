@@ -1,9 +1,8 @@
 
 const ws = new WebSocket("ws://localhost:8880");
 
-let chatsArr = []
+let chatsArr = {};
 let currentChat = null;
-
 
 const generationChats = async () => {
     const token = localStorage.getItem('token');
@@ -15,29 +14,50 @@ const generationChats = async () => {
     if(response.status === 200) {
         return  await response.json();
     } else {
+
     }
 };
 
 generationChats().then(chats => {
-    chatsArr = chats
+    chatsArr = {};
+
+    chats.forEach(chat => {
+        chatsArr[chat.id] = {
+            title: chat.title,
+            messages: []
+        };
+    });
+
     renderChats();
 });
-
 
 ws.onopen = () => {
     console.log("WS connected");
 };
 
 ws.onmessage = ({ data }) => {
+
     const event = JSON.parse(data);
-    console.log(event)
-    if (event.type === "chat_created") {
-        const chat = event.chat;
-        chatsArr[chat.title] = [];
-        renderChats();
+
+    if (event.type === "message") {
+
+        if (!chatsArr[event.chatId]) {
+            chatsArr[event.chatId] = {
+                title: "chat",
+                messages: []
+            };
+        }
+
+        chatsArr[event.chatId].messages.push({
+            text: event.text,
+            mine: event.userId === window.userId
+        });
+
+        if (Number(currentChat) === Number(event.chatId)) {
+            renderMessages(); // 🔥 ВАЖНО
+        }
     }
 };
-
 
 async function createChat() {
 
@@ -45,58 +65,75 @@ async function createChat() {
     const title = input.value.trim();
 
     if (!title) return;
+    const token = localStorage.getItem('token');
+    const response = await fetch("/chats", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+        },
 
-    if (chatsArr[title]) {
-        alert("Такой чат уже существует");
-        return;
-    }
-        const token = localStorage.getItem("token");
+        body: JSON.stringify({ title })
+    });
 
-        const response = await fetch("/chats", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`
-            },
-            body: JSON.stringify({
-                title
-            })
-        });
+    const chat = await response.json();
 
-        const chat = await response.json();
+    chatsArr[chat.id] = {
+        title: chat.title,
+        messages: []
+    };
 
-     chatsArr[title] = [];
     input.value = "";
-    renderChats();
-    openChat(title);
-}
 
+    renderChats();
+    await openChat(chat.id);
+}
 
 function renderChats() {
 
     const list = document.getElementById("chatList");
     list.innerHTML = "";
-    chatsArr.forEach(chat => {
+
+    Object.entries(chatsArr).forEach(([id, chat]) => {
+
         const div = document.createElement("div");
 
         div.className =
             "chat-item" +
-            (chat.title === currentChat ? " active" : "");
+            (id === currentChat ? " active" : "");
 
+        // 🔥 ПОКАЗЫВАЕМ НАЗВАНИЕ
         div.textContent = chat.title;
 
-        div.onclick = () => openChat(chat.title);
+        // 🔥 ОТКРЫВАЕМ ПО ID
+        div.onclick = () => openChat(id);
 
         list.appendChild(div);
     });
 }
 
-function openChat(title) {
+async function openChat(chatId) {
 
-    currentChat = title;
+    currentChat = chatId;
+    document.getElementById("chatTitle").textContent = chatId;
+    const token = localStorage.getItem('token');
+    const response = await fetch(`/messages/${currentChat}`, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
 
-    document.getElementById("chatTitle")
-        .textContent = title;
+    const data = await response.json();
+    console.log(data)
+    ws.send(JSON.stringify({
+        type: "join",
+        chatId: chatId
+    }));
+
+    chatsArr[chatId].messages = data.map(m => ({
+        text: m.text,
+        mine: m.userId
+    }));
 
     renderChats();
     renderMessages();
@@ -104,62 +141,66 @@ function openChat(title) {
 
 function renderMessages() {
 
-    const container =
-        document.getElementById("messages");
-
+    const container = document.getElementById("messages");
     container.innerHTML = "";
 
     if (!currentChat) return;
 
-    chatsArr[currentChat].forEach(msg => {
+    const chat = chatsArr[currentChat];
+
+    if (!chat) return;
+
+    chat.messages.forEach(msg => {
 
         const div = document.createElement("div");
 
-        div.className =
-            `message ${msg.mine ? 'mine' : 'other'}`;
+        // 🔥 ВАЖНО: СТАБИЛЬНОЕ УСЛОВИЕ
+        div.classList.add("message");
+
+        if (msg.mine) {
+            div.classList.add("mine");
+        } else {
+            div.classList.add("other");
+        }
 
         div.textContent = msg.text;
 
         container.appendChild(div);
     });
 
-    container.scrollTop =
-        container.scrollHeight;
+    container.scrollTop = container.scrollHeight;
 }
 
-function sendMessage() {
+async function  sendMessage() {
 
     if (!currentChat) {
         alert("Сначала выберите чат");
         return;
     }
 
-    const input =
-        document.getElementById("messageInput");
-
+    const input = document.getElementById("messageInput");
     const text = input.value.trim();
 
     if (!text) return;
-
-    chatsArr[currentChat].push({
-        text,
-        mine:true
-    });
-
-    input.value = "";
-
-    renderMessages();
-
-    setTimeout(() => {
-
-        chatsArr[currentChat].push({
-            text:"Ответ на: " + text,
-            mine:false
+    const token = localStorage.getItem("token");
+    try {
+        await fetch("/messages", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                text,
+                chatId: currentChat
+            })
         });
 
-        renderMessages();
+        input.value = "";
 
-    }, 500);
+    } catch (err) {
+        console.error("Send message error:", err);
+    }
 }
 
 document
@@ -171,4 +212,4 @@ document
         }
     });
 
-createChat.bind(null);
+

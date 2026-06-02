@@ -1,5 +1,6 @@
 const form = document.getElementById("loginForm");
 
+
 form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
@@ -18,6 +19,8 @@ form.addEventListener("submit", async (e) => {
         const data = await res.json();
         console.log("Ответ сервера:", data);
         localStorage.setItem("token", data.token);
+        const payload = JSON.parse(atob(data.token.split(".")[1]));
+        window.userId = payload.id;
         window.location.href = "/";
 
     } catch (err) {

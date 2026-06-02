@@ -1,7 +1,7 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../db.js";
 
-export const MessageModel = sequelize.define("Message", {
+export const MessageModel = sequelize.define("Messages", {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -13,10 +13,15 @@ export const MessageModel = sequelize.define("Message", {
         allowNull: false,
     },
 
-    username: {
-        type: DataTypes.TEXT,
+    chatId: {
+        type: DataTypes.INTEGER,
         allowNull: false
     },
 
-    timestamps: true
+    userId: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+    }
+
+    // timestamps: true
 });

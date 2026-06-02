@@ -20,5 +20,5 @@ export const UserModel = sequelize.define("User", {
         allowNull: false,
     },
 
-    timestamps: true
+    // timestamps: true
 })

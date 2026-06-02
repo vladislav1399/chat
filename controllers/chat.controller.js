@@ -1,5 +1,5 @@
 import {ChatModel} from "../models/chat.model.js";
-
+import {broadcast} from "../websocket.js";
 
 export const createChat = async (req, res) => {
 
@@ -19,7 +19,10 @@ export const createChat = async (req, res) => {
             title,
             image
         })
-        // await chat.addUser(req.user.id);
+        broadcast({
+            type: "chat_created",
+            chat
+        });
         return res.status(201).json(chat);
     } catch (e) {
         return res.status(500).json({ message: "Server error" }, e);
